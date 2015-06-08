@@ -1,6 +1,6 @@
 class Parser::Ruby22
 
-token kCLASS kMODULE kDEF kUNDEF kBEGIN kRESCUE kENSURE kEND kIF kUNLESS
+token kCLASS kFUNCTION kMODULE kDEF kON kUNDEF kBEGIN kRESCUE kENSURE kEND kIF kUNLESS
       kTHEN kELSIF kELSE kCASE kWHEN kWHILE kUNTIL kFOR kBREAK kNEXT
       kREDO kRETRY kIN kDO kDO_COND kDO_BLOCK kDO_LAMBDA kRETURN kYIELD kSUPER
       kSELF kNIL kTRUE kFALSE kAND kOR kNOT kIF_MOD kUNLESS_MOD kWHILE_MOD
@@ -578,10 +578,11 @@ rule
 
         reswords: k__LINE__ | k__FILE__ | k__ENCODING__ | klBEGIN | klEND
                 | kALIAS    | kAND      | kBEGIN        | kBREAK  | kCASE
-                | kCLASS    | kDEF      | kDEFINED      | kDO     | kELSE
+                | kCLASS    | kDEF      | kON
+                | kDEFINED  | kDO       | kELSE
                 | kELSIF    | kEND      | kENSURE       | kFALSE  | kFOR
-                | kIN       | kMODULE   | kNEXT         | kNIL    | kNOT
-                | kOR       | kREDO     | kRESCUE       | kRETRY  | kRETURN
+                | kIN       | kFUNCTION | kMODULE   | kNEXT         | kNIL
+                | kNOT      | kOR       | kREDO     | kRESCUE       | kRETRY  | kRETURN
                 | kSELF     | kSUPER    | kTHEN         | kTRUE   | kUNDEF
                 | kWHEN     | kYIELD    | kIF           | kUNLESS | kWHILE
                 | kUNTIL
@@ -1152,6 +1153,23 @@ rule
 
                       @def_level = val[4]
                     }
+                | kFUNCTION fname
+                    {
+                      @static_env.extend_static
+                      @lexer.push_cmdarg
+                    }
+                    bodystmt kEND
+                    {
+                      if in_def?
+                        diagnostic :error, :module_in_def, nil, val[0]
+                      end
+
+                      result = @builder.def_function(val[0], val[1],
+                                                   val[3], val[4])
+
+                      @lexer.pop_cmdarg
+                      @static_env.unextend
+                    }
                 | kMODULE cpath
                     {
                       @static_env.extend_static
@@ -1178,6 +1196,21 @@ rule
                     f_arglist bodystmt kEND
                     {
                       result = @builder.def_method(val[0], val[1],
+                                  val[3], val[4], val[5])
+
+                      @lexer.pop_cmdarg
+                      @static_env.unextend
+                      @def_level -= 1
+                    }
+                | kON cpath
+                    {
+                      @def_level += 1
+                      @static_env.extend_static
+                      @lexer.push_cmdarg
+                    }
+                    f_arglist bodystmt kEND
+                    {
+                      result = @builder.def_on(val[0], val[1],
                                   val[3], val[4], val[5])
 
                       @lexer.pop_cmdarg

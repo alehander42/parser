@@ -471,6 +471,12 @@ module Parser
     # Class and module definition
     #
 
+    def def_function(def_t, name,
+                     body, end_t)
+      n(:function, [ value(name).to_sym, body ],
+        definition_map(def_t, nil, name, end_t))
+    end
+
     def def_class(class_t, name,
                   lt_t, superclass,
                   body, end_t)
@@ -486,6 +492,7 @@ module Parser
 
     def def_module(module_t, name,
                    body, end_t)
+      p name, module_t
       n(:module, [ name, body ],
         module_definition_map(module_t, name, nil, end_t))
     end
@@ -493,6 +500,12 @@ module Parser
     #
     # Method (un)definition
     #
+
+    def def_on(class_t, name_t, args,
+               body, end_t)
+      n(:on, [ name_t, args, body ],
+        module_definition_map(class_t, name_t, nil, end_t))
+    end
 
     def def_method(def_t, name_t, args,
                    body, end_t)

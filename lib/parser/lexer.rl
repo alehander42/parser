@@ -466,7 +466,7 @@ class Parser::Lexer
     'rescue' => :kRESCUE,      'defined?' => :kDEFINED,
   }
 
-  %w(class module def undef begin end then elsif else ensure case when
+  %w(class function module on def undef begin end then elsif else ensure case when
      for break next redo retry in do return yield super self nil true
      false and or not alias __FILE__ __LINE__ __ENCODING__).each do |keyword|
     KEYWORDS_BEGIN[keyword] = KEYWORDS[keyword] = :"k#{keyword.upcase}"
@@ -564,10 +564,10 @@ class Parser::Lexer
   keyword_with_arg    = 'yield'  | 'super'  | 'not'    | 'defined?' ;
 
   # A list of keywords which accept a literal function name as an argument.
-  keyword_with_fname  = 'def'    | 'undef'  | 'alias'  ;
+  keyword_with_fname  = 'on'     | 'def'    | 'undef'  | 'alias'  ;
 
   # A list of keywords which accept an expression after them.
-  keyword_with_value  = 'else'   | 'case'   | 'ensure' | 'module' | 'elsif' | 'then'  |
+  keyword_with_value  = 'else'   | 'case'   | 'ensure' | 'function' | 'module' | 'elsif' | 'then'  |
                         'for'    | 'in'     | 'do'     | 'when'   | 'begin' | 'class' |
                         'and'    | 'or'     ;
 
