@@ -492,7 +492,6 @@ module Parser
 
     def def_module(module_t, name,
                    body, end_t)
-      p name, module_t
       n(:module, [ name, body ],
         module_definition_map(module_t, name, nil, end_t))
     end
